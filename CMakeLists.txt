@@ -1,0 +1,11 @@
+# Project  Resource Manager
+#
+# @author  Roman Zelinskyi <lord.zelinskyi@gmail.com>
+
+cmake_minimum_required(VERSION 3.5)
+
+project(resource-manager CXX)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CXX_STANDARD_REQUIRED ON)
+set(CXX_EXTENSIONS OFF)
