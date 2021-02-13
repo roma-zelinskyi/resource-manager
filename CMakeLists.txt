@@ -9,3 +9,7 @@ project(resource-manager CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CXX_STANDARD_REQUIRED ON)
 set(CXX_EXTENSIONS OFF)
+
+include(cmake/Warnings.cmake)
+
+add_subdirectory(src)
