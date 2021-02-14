@@ -11,7 +11,11 @@
 #include <limits>
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <utility>
+
+#include "allocator.hpp"
+#include "user.hpp"
 
 namespace rm {
 
@@ -21,50 +25,83 @@ public:
     Impl(const std::uint32_t capacity)
         : _capacity{capacity}
         , _size{0}
+        , _users{}
+        , _usersLookup{}
+        , _allocator{}
     {
     }
 
-    void attachUser(
-        [[maybe_unused]] const std::string& user, [[maybe_unused]] const std::uint32_t userCapacity)
+    void attachUser(const std::string& user, const std::uint32_t userCapacity)
     {
+        _users.emplace(user, userCapacity);
     }
 
-    void detachUser([[maybe_unused]] const std::string& user)
+    void detachUser(const std::string& user)
     {
+        _users.erase(user);
     }
 
-    std::string allocate([[maybe_unused]] const std::string& userName)
+    std::string allocate(const std::string& userName)
     {
-        return {};
+        if (_size == _capacity)
+            throw std::overflow_error{"Resource manger capacity overflow"};
+
+        auto& resourceUser = _users.at(userName);
+
+        if (resourceUser.availableCapacity() == 0)
+            throw std::overflow_error{{"Capacity overflow for user: " + userName}};
+
+        const auto resourceId = _allocator.allocate();
+        resourceUser.addResource(resourceId);
+        _usersLookup[resourceId] = userName;
+
+        ++_size;
+
+        return resourceId;
     }
 
-    void deallocate([[maybe_unused]] const std::string& resourceId)
+    void deallocate(const std::string& resourceId)
     {
+        const auto userName = _usersLookup.at(resourceId);
+        auto& resourceUser = _users.at(userName);
+        resourceUser.removeResource(resourceId);
+        _usersLookup.erase(resourceId);
+        --_size;
     }
 
-    std::forward_list<std::string> listUserResources([[maybe_unused]] const std::string& userName)
+    const std::unordered_set<std::string>& listUserResources(const std::string& userName) const
+        noexcept
     {
-        return {};
+        return _users.at(userName).resources();
     }
 
     std::forward_list<std::pair<std::string, std::string>> listResources()
     {
-        return {};
+        auto resourceList = std::forward_list<std::pair<std::string, std::string>>{};
+
+        for (const auto& [userName, user] : _users)
+            for (const auto& resource : user.resources())
+                resourceList.emplace_front(userName, resource);
+
+        return resourceList;
     }
 
     bool hasCapacity() const noexcept
     {
-        return {};
+        return _size != _capacity;
     }
 
-    bool hasUserCapacity([[maybe_unused]] const std::string& userName) const noexcept
+    bool hasUserCapacity(const std::string& userName) const noexcept
     {
-        return {};
+        return _users.at(userName).availableCapacity() > 0;
     }
 
 private:
     std::uint32_t _capacity;
     std::uint32_t _size;
+    std::unordered_map<std::string, User> _users;
+    std::unordered_map<std::string, std::string> _usersLookup;
+    Allocator _allocator;
 };
 
 ResourceManager::ResourceManager(std::uint32_t capacity)
@@ -97,7 +134,8 @@ void ResourceManager::deallocate(const std::string& resourceId)
     _impl->deallocate(resourceId);
 }
 
-std::forward_list<std::string> ResourceManager::listUserResources(const std::string& userName)
+const std::unordered_set<std::string>&
+ResourceManager::listUserResources(const std::string& userName) const noexcept
 {
     return _impl->listUserResources(userName);
 }
