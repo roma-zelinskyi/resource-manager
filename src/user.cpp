@@ -8,10 +8,9 @@
 
 #include <cstdint>
 #include <limits>
+#include <stdexcept>
 #include <string>
 #include <unordered_set>
-
-#include "error.hpp"
 
 namespace rm {
 
@@ -35,7 +34,7 @@ void User::addResource(const std::string& resource)
         _resources.insert(resource);
     else {
         if (_size == _capacity)
-            throw Error{"No capacity left for given user", ErrorCode::NoUserCapacity};
+            throw std::overflow_error{"Capacity overflow for given user"};
 
         _resources.insert(resource);
         ++_size;
@@ -45,7 +44,7 @@ void User::addResource(const std::string& resource)
 void User::removeResource(const std::string& resource)
 {
     if (!_resources.count(resource))
-        throw Error({"No resource with ID: " + resource}, ErrorCode::NoResource);
+        throw std::invalid_argument({"No such resource: " + resource});
 
     _resources.erase(resource);
     --_size;
