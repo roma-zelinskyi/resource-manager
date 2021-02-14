@@ -15,6 +15,13 @@
 
 namespace rm {
 
+User::User()
+    : _capacity{std::numeric_limits<std::uint32_t>::infinity()}
+    , _size{0}
+    , _resources{}
+{
+}
+
 User::User(const std::uint32_t capacity)
     : _capacity{capacity}
     , _size{0}
@@ -37,11 +44,10 @@ void User::addResource(const std::string& resource)
 
 void User::removeResource(const std::string& resource)
 {
+    if (!_resources.count(resource))
+        throw Error({"No resource with ID: " + resource}, ErrorCode::NoResource);
+
     _resources.erase(resource);
-
-    if (_capacity == std::numeric_limits<std::uint32_t>::infinity())
-        return;
-
     --_size;
 }
 
