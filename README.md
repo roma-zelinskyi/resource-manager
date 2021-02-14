@@ -13,10 +13,18 @@ cmake --build build -- -j`nproc`
 cmake -Bbuild -H. -GNinja -DCMAKE_BUILD_TYPE=Debug
 cmake --build build
 ```
+**Build using Docker**
+```bash
+docker build -t rm ./
+docker run --privileged -ti -v $(pwd):/proj rm
+cmake -Bbuild -H. -GNinja -DCMAKE_BUILD_TYPE=Debug
+cmake --build build
+```
 ## Tests
 **Run tests**
 ```bash
-./bin/unit-tests
+cmake --build build --target tests
+build/bin/unit-tests
 ```
 ## Examples
 ```cpp
@@ -33,4 +41,3 @@ int main()
   rm.deallocate(rsId1);
 }
 ```
-
