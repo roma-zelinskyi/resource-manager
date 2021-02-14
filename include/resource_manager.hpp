@@ -9,6 +9,7 @@
 #include <limits>
 #include <memory>
 #include <string>
+#include <unordered_set>
 #include <utility>
 
 namespace rm {
@@ -54,7 +55,8 @@ public:
     /*!
      * List all allocated resources for the given user.
      */
-    std::forward_list<std::string> listUserResources(const std::string& userName);
+    const std::unordered_set<std::string>& listUserResources(const std::string& userName) const
+        noexcept;
 
     /*!
      * List all resources managed by resource manger.
