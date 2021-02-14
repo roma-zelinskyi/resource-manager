@@ -18,12 +18,13 @@ public:
     void addResource(const std::string& resource);
     void removeResource(const std::string& resource);
 
-    std::uint32_t capacity() const noexcept;
+    std::uint32_t availableCapacity() const noexcept;
 
     const std::unordered_set<std::string>& resources() const noexcept;
 
 private:
     std::uint32_t _capacity;
+    std::uint32_t _size;
     std::unordered_set<std::string> _resources;
 };
 
