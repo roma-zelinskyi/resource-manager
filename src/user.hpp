@@ -13,6 +13,7 @@ namespace rm {
 class User
 {
 public:
+    User();
     explicit User(std::uint32_t capacity);
 
     void addResource(const std::string& resource);
